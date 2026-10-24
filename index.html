@@ -629,6 +629,37 @@
   };
   $("dlBtn").onclick=download;
 
+  /* ---- daily teaser poster (1080x1350) for the morning post ---- */
+  function teaserCard(d){
+    var PAPER="#F1EBDF", INK="#12100E", ACC="#FF4A17";
+    var MONO="ui-monospace,Menlo,monospace", DISP="'Archivo Black',Impact,'Arial Black',sans-serif";
+    var c=document.createElement("canvas"); c.width=1080; c.height=1350;
+    var x=c.getContext("2d"), W=1080, H=1350, M=64, MAXW=W-2*M;
+    x.fillStyle=PAPER; x.fillRect(0,0,W,H);
+    x.fillStyle=ACC; x.fillRect(0,0,W,26);
+    x.fillStyle=INK; x.fillRect(M,90,372,58);
+    x.fillStyle=PAPER; x.font="900 28px "+DISP; x.fillText("WARRI BRAIN",M+16,130);
+    x.fillStyle="rgba(18,16,14,.55)"; x.font="700 24px "+MONO;
+    x.fillText("DAY "+d+" · EVERY MORNING 7:00",M,196);
+    x.fillStyle=INK;
+    fit(x,"3 QUESTIONS.",MAXW,104,DISP); x.fillText("3 QUESTIONS.",M,330);
+    fit(x,"ONE DROP A DAY.",MAXW,104,DISP); x.fillText("ONE DROP A DAY.",M,442);
+    fit(x,"7:00AM.",MAXW,104,DISP);
+    x.fillStyle=ACC; x.fillText("7:00AM.",M,554);
+    x.fillStyle=INK; x.font="600 30px ui-sans-serif,system-ui,sans-serif";
+    x.fillText("Three questions about this city. Three tries.",M,638);
+    x.fillText("Speed is the score. One fact after every answer.",M,684);
+    x.fillStyle=INK; x.fillRect(M,726,MAXW,4);
+    x.fillStyle="rgba(18,16,14,.78)"; fit(x,"OKPAKA · EFFURUN · EKPAN · OSUBI · UGBORIKOKO · UBEJI · AGBARHO",MAXW,23,MONO);
+    x.fillText("OKPAKA · EFFURUN · EKPAN · OSUBI · UGBORIKOKO · UBEJI · AGBARHO",M,776);
+    x.fillStyle="rgba(18,16,14,.55)"; fit(x,"EVERY AREA DEY COMPETE. YOUR AREA DEY ON THE BOARD.",MAXW,23,MONO);
+    x.fillText("EVERY AREA DEY COMPETE. YOUR AREA DEY ON THE BOARD.",M,816);
+    x.fillStyle=INK; fit(x,"nexa-tech-layers.github.io/warri-brain",MAXW,36,MONO);
+    x.fillText("nexa-tech-layers.github.io/warri-brain",M,1010);
+    if(skyImg&&skyImg.complete&&skyImg.naturalWidth) x.drawImage(skyImg,0,1054,W,296);
+    return c.toDataURL("image/png");
+  }
+
   /* ---- boot ---- */
   $("sky").innerHTML=SKY_SVG;
   loadSky();
@@ -648,6 +679,7 @@
     areaPos:function(){ return areaPos; },
     correct:function(){ return correct; },
     card:function(){ return $("cardPrev").toDataURL("image/png"); },
+    teaser:function(d){ return teaserCard(d||day); },
     last:function(){ return qs[qi]?qs[qi].q:null; },
     font:function(){ return (document.fonts&&document.fonts.check)?document.fonts.check("900 40px 'Archivo Black'"):null; }
   };

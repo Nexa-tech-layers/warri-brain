@@ -167,6 +167,10 @@
       <div><b>8s</b><span>each one — speed counts</span></div>
       <div><b>1</b><span>Warri fact after every answer</span></div>
     </div>
+    <div class="boardwrap" style="margin-top:18px;flex:none;">
+      <div class="bhead"><span>Loudest areas today</span><span>Players</span></div>
+      <div class="board" id="lockBoard"></div>
+    </div>
     <div class="spacer"></div>
     <button class="btn" id="lockPlay">Play today's own (demo)</button>
     <p class="note">Prototype for review — crowd and area board are simulated.</p>
@@ -338,6 +342,20 @@
   }
 
   /* ---- area ---- */
+  function boardRows(){
+    var seed=day*77+3;
+    return AREAS.map(function(n,i){ return {n:n,c:Math.floor(rnd(seed+i)*780)+120}; })
+      .sort(function(a,b){ return b.c-a.c; });
+  }
+  function lockTeaser(){
+    var el=$("lockBoard"); el.innerHTML="";
+    boardRows().slice(0,3).forEach(function(r,i){
+      var d=document.createElement("div");
+      d.className="row";
+      d.innerHTML="<span>"+(i+1)+" &nbsp;"+r.n+"</span><span><b>"+r.c.toLocaleString("en-US")+"</b></span>";
+      el.appendChild(d);
+    });
+  }
   function buildAreas(){
     var g=$("areaGrid"); g.innerHTML="";
     AREAS.forEach(function(n){
@@ -433,9 +451,7 @@
   var areaPos=0;
   function buildBoard(myArea){
     var el=$("board"); el.innerHTML="";
-    var seed=day*77+3;
-    var rows=AREAS.map(function(n,i){ return {n:n,c:Math.floor(rnd(seed+i)*780)+120}; })
-      .sort(function(a,b){ return b.c-a.c; });
+    var rows=boardRows();
     areaPos=0;
     rows.forEach(function(r,i){
       var mine=(r.n===myArea);
@@ -551,6 +567,7 @@
   /* ---- boot ---- */
   buildAreas();
   todaysSet();
+  lockTeaser();
   $("chip").textContent="DAY "+day+" · 7:00AM";
   $("brandLine").innerHTML="Today's questions from: <b>"+BRAND+"</b>";
   show("s-lock"); tick();

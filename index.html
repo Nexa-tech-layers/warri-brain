@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0C">
+<meta name="description" content="Three questions about Warri. Once a day. Only the city gets them right.">
+<title>WARRI BRAIN</title>
+<style>
+  :root{
+    --ground:#0B0B0C; --bone:#EFEAE0; --dim:rgba(239,234,224,.55);
+    --gold:#D9B778; --gold2:#F0D9A8; --red:#E85D3A; --green:#5FBF7F;
+    --line:rgba(239,234,224,.14);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:#000;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--bone);display:flex;justify-content:center;overscroll-behavior:none;
+  }
+  #stage{
+    position:relative;width:100%;max-width:430px;height:100dvh;overflow:hidden;
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgba(217,183,120,.10), transparent 60%),
+      linear-gradient(180deg,#0E0E10 0%, var(--ground) 55%, #08080A 100%);
+  }
+  .tagrow{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:18px;right:18px;
+    display:flex;justify-content:space-between;align-items:center;z-index:40;pointer-events:none;}
+  .tag{font:700 8.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.22em;
+    color:rgba(239,234,224,.42);border:1px solid var(--line);border-radius:100px;padding:6px 10px;}
+  .streak{font:700 8.5px/1 ui-monospace,monospace;letter-spacing:.22em;color:var(--gold);}
+
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:calc(env(safe-area-inset-top,0px) + 64px) 22px calc(env(safe-area-inset-bottom,0px) + 20px);
+    z-index:20;}
+  .screen.on{display:flex;}
+  h1{font-size:10.5px;letter-spacing:.34em;font-weight:700;color:var(--dim);margin:0 0 8px;}
+  .big{font-size:clamp(40px,13.5vw,58px);font-weight:800;letter-spacing:-.025em;line-height:.96;margin:0;}
+  .sub{font-size:13.5px;line-height:1.5;color:var(--dim);margin:14px 0 0;max-width:36ch;}
+  .spacer{flex:1;}
+  .rule{height:1px;background:var(--line);margin:18px 0;}
+  .tick{font:700 10.5px/1.9 ui-monospace,monospace;letter-spacing:.16em;color:var(--dim);}
+  .tick b{color:var(--bone);}
+  .cta{appearance:none;border:0;border-radius:100px;padding:16px 22px;font-size:12px;font-weight:800;
+    letter-spacing:.16em;background:var(--gold);color:#141007;cursor:pointer;width:100%;}
+  .cta.ghost{background:transparent;color:var(--bone);border:1px solid var(--line);}
+  .note{margin:16px 0 0;font:500 9.5px/1.5 ui-monospace,monospace;letter-spacing:.06em;
+    color:rgba(239,234,224,.26);max-width:42ch;}
+
+  /* areas */
+  #areaGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px;}
+  .area{border:1px solid var(--line);border-radius:12px;padding:14px 12px;font-size:12.5px;font-weight:700;
+    letter-spacing:.04em;background:rgba(255,255,255,.02);color:var(--bone);cursor:pointer;text-align:left;}
+  .area:active{background:rgba(217,183,120,.14);}
+
+  /* play */
+  .qhead{display:flex;justify-content:space-between;align-items:baseline;
+    font:700 10px/1 ui-monospace,monospace;letter-spacing:.2em;color:var(--dim);}
+  .timerbar{height:3px;background:rgba(255,255,255,.08);border-radius:100px;margin:14px 0 22px;overflow:hidden;}
+  .timerbar .fill{height:100%;width:100%;background:var(--gold);transition:width .1s linear;}
+  .qtext{font-size:22px;font-weight:800;line-height:1.22;letter-spacing:-.01em;margin:0 0 22px;}
+  .opts{display:flex;flex-direction:column;gap:10px;}
+  .opt{appearance:none;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.02);
+    color:var(--bone);border-radius:14px;padding:15px 16px;font-size:14.5px;font-weight:600;cursor:pointer;
+    display:flex;gap:12px;align-items:center;}
+  .opt .k{font:700 10px/1 ui-monospace,monospace;letter-spacing:.1em;color:var(--gold);}
+  .opt.right{border-color:rgba(95,191,127,.6);background:rgba(95,191,127,.12);}
+  .opt.wrong{border-color:rgba(232,93,58,.6);background:rgba(232,93,58,.12);}
+  .factbox{margin-top:20px;border-left:2px solid var(--gold);padding:2px 0 2px 14px;
+    font-size:13px;line-height:1.55;color:rgba(239,234,224,.8);display:none;}
+  .factbox.on{display:block;}
+
+  /* done */
+  .grid3{display:flex;gap:8px;margin:16px 0 0;}
+  .sq{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.08);}
+  .sq.ok{background:var(--gold);}
+  .sq.no{background:rgba(232,93,58,.75);}
+  .cardwrap{margin:18px auto 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;flex:none;
+    background:rgba(255,255,255,.02);height:34vh;aspect-ratio:4/5;max-width:100%;}
+  #cardPrev{display:block;width:100%;height:100%;}
+  .board{margin-top:6px;}
+  .board .row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);
+    font:600 12px/1.3 ui-monospace,monospace;letter-spacing:.04em;color:var(--dim);}
+  .board .row.me{color:var(--bone);}
+  .board .row.me i{color:var(--gold);font-style:normal;}
+  .board .row b{color:var(--bone);font-weight:800;}
+  .brandline{margin-top:14px;border:1px dashed var(--line);border-radius:12px;padding:12px 14px;
+    font:700 9.5px/1.5 ui-monospace,monospace;letter-spacing:.14em;color:var(--dim);}
+  .brandline b{color:var(--gold);}
+  .row2{display:flex;flex-direction:column;gap:9px;margin-top:16px;flex:none;}
+  .board,.brandline,.note,.tick,.factbox,.grid3,.qtext,.opts,.rule{flex:none;}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="tagrow">
+    <div class="tag">PROTOTYPE · CROWD SIMULATED</div>
+    <div class="streak" id="streakTop">STREAK 0</div>
+  </div>
+
+  <!-- LOCK -->
+  <div class="screen" id="s-lock">
+    <h1>WARRI BRAIN</h1>
+    <p class="big">3 QUESTIONS.<br>ONCE A DAY.</p>
+    <p class="sub">Only people wey come from this city go get them right. Opens 7:00am, locks at midnight.</p>
+    <div class="spacer"></div>
+    <div class="rule"></div>
+    <div class="tick" id="lockLine">NEXT DROP IN &nbsp;<b id="lockCd">--:--:--</b></div>
+    <button class="cta" id="lockPlay" style="margin-top:18px">PLAY TODAY NOW (DEMO)</button>
+    <p class="note">Prototype for review. Not launched yet — for the walkthrough the drop is always open. Real numbers, crowd and scoreboard are simulated until launch.</p>
+  </div>
+
+  <!-- AREA -->
+  <div class="screen" id="s-area">
+    <h1>FIRST THING</h1>
+    <p class="big">WHICH SIDE<br>YOU DEY?</p>
+    <p class="sub">Your area dey score with you. No account, no login — e just save for this phone.</p>
+    <div id="areaGrid"></div>
+    <div class="spacer"></div>
+    <p class="note">Warri Brain — run by residents, not by any brand.</p>
+  </div>
+
+  <!-- PLAY -->
+  <div class="screen" id="s-play">
+    <div class="qhead"><span id="qNum">QUESTION 1 OF 3</span><span id="qTime">8s</span></div>
+    <div class="timerbar"><div class="fill" id="qFill"></div></div>
+    <p class="qtext" id="qText">—</p>
+    <div class="opts" id="opts"></div>
+    <div class="factbox" id="factBox"><span id="factTxt"></span></div>
+    <div class="spacer"></div>
+    <button class="cta" id="qNext" style="display:none">NEXT →</button>
+  </div>
+
+  <!-- DONE -->
+  <div class="screen" id="s-done">
+    <h1 id="dKicker">DAY 1 · TODAY'S RESULT</h1>
+    <p class="big" id="dScore">0/3</p>
+    <div class="grid3" id="dGrid"></div>
+    <div class="tick" style="margin-top:16px">
+      TIME &nbsp;<b id="dTime">—</b><br>AREA &nbsp;<b id="dArea">—</b><br>WARRI RANK &nbsp;<b id="dRank">—</b>
+    </div>
+    <div class="cardwrap"><canvas id="cardPrev" width="1080" height="1350"></canvas></div>
+    <div class="row2">
+      <button class="cta" id="shareBtn">SHARE MY RESULT</button>
+      <button class="cta ghost" id="dlBtn">SAVE THE CARD</button>
+    </div>
+    <div class="rule"></div>
+    <h1>THE LOUDEST AREAS TODAY</h1>
+    <div class="board" id="board"></div>
+    <div class="brandline" id="brandLine">TODAY'S QUESTIONS FROM &nbsp;<b>RAVEN GRILLS</b></div>
+    <p class="note">No answer dey for the card — so sharing no spoil am for anybody. Come back tomorrow 7:00am.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){ return document.getElementById(id); };
+
+/* ============================================================
+   THE QUESTION BANK — edit / correct these. One list, all here.
+   a = index of the correct option. f = the one-line local fact.
+   ============================================================ */
+var BANK=[
+ {q:"Wetin be the popular nickname for Warri?",
+  o:["Waffi","Warri City","Oil Town","Delta One"],a:0,
+  f:"Waffi. And the city motto na 'Warri no dey carry last.'"},
+ {q:"PTI for Effurun stand for wetin?",
+  o:["Petroleum Training Institute","Ports and Transport Institute","Petrochemical Technology Institute","Petroleum Technical Institute"],a:0,
+  f:"PTI — Petroleum Training Institute, Effurun. E dey train oil and gas workers since the 1970s."},
+ {q:"Osubi Airport (Warri Airport) dey which local government?",
+  o:["Okpe","Uvwie","Udu","Warri South"],a:0,
+  f:"Osubi dey Okpe LGA — and na the airport wey serve the whole city."},
+ {q:"Wetin be the name of Warri football team?",
+  o:["Warri Wolves","Warri United","Delta Force","Waffi Warriors"],a:0,
+  f:"Warri Wolves — dem dey play for Warri Township Stadium."},
+ {q:"Which market be the biggest for Warri?",
+  o:["Igbudu Market","Effurun Market","Main Market","Ekpan Market"],a:0,
+  f:"Igbudu — the biggest. Anything you need, e dey there."},
+ {q:"Which one NO be native Warri ethnic group?",
+  o:["Igala","Itsekiri","Urhobo","Ijaw"],a:0,
+  f:"Waffi na Itsekiri, Urhobo, Ijaw and Isoko land — everybody else na settler, and the city no dey carry last for anybody."},
+ {q:"Wetin be the title of the Olu of Warri?",
+  o:["Ogiame","Olu Oba","Orodje","Ovie"],a:0,
+  f:"Ogiame. The current one na Ogiame Atuwatse III."},
+ {q:"Which refinery dey for Ekpan?",
+  o:["Warri Refinery","Koko Refinery","Aladja Refinery","Escravos Refinery"],a:0,
+  f:"Warri Refining and Petrochemical Company dey Ekpan."},
+ {q:"Which pidgin word mean 'take am easy' for Warri?",
+  o:["Rora","Gbege","Chop","Waka"],a:0,
+  f:"Rora — e come from Urhobo. When person too hot, you tell am rora."},
+ {q:"Which roundabout dey link Airport Road go the express?",
+  o:["Effurun Roundabout","Enerhen Junction","PTI Junction","Ubeji Roundabout"],a:0,
+  f:"Effurun Roundabout — if you know Waffi traffic, you know that place."},
+ {q:"Which Warri rapper carry the city sound go everywhere?",
+  o:["Erigga","Harrysong","Timaya","Duncan Mighty"],a:0,
+  f:"Erigga — Warri boy, and im mouth no dey carry last either."},
+ {q:"FUPRE for Effurun, wetin e stand for?",
+  o:["Federal University of Petroleum Resources","Federal University of Port Resources","Federal University of Production and Refining","Federal University of Petrochemical Research"],a:0,
+  f:"FUPRE — Federal University of Petroleum Resources, Effurun."},
+ {q:"Which river dey run through Warri?",
+  o:["Warri River","Benin River","Forcados River","Sapele River"],a:0,
+  f:"Warri River — the city sit on top of am."},
+ {q:"'Waffi no dey carry last' — wetin e mean?",
+  o:["Warri people no dey accept second place","Warri people dey always late","Warri people no dey run race","Warri people dey travel well"],a:0,
+  f:"E mean Warri no dey come second. Na the whole city's spine."},
+ {q:"Which estate area wey dey grow fast for Okpaka/Udu side?",
+  o:["Wetland","GRA","Airport Estate","DSC Estate"],a:0,
+  f:"Wetland, Okpaka — one of the estates wey dey blow up for Udu side."}
+];
+
+var AREAS=["Effurun","Ekpan","Ugborikoko","Okpaka / Wetland","Osubi","Airport Road","Ubeji","Warri Central"];
+var SECS=8, LAUNCH="2026-10-25";
+var URL_SHORT="nexa-tech-layers.github.io/warri-brain";
+
+/* ---------- state ---------- */
+var day, set, qi=0, correct=0, tStart=0, qStart=0, best=0, area="", marks=[], timer=null, ac=null;
+try{ area=localStorage.getItem("wb_area")||""; best=parseInt(localStorage.getItem("wb_streak")||"0",10)||0; }catch(e){}
+
+function daysSince(d){ var a=new Date(d+"T00:00:00"), b=new Date(); b.setHours(0,0,0,0); return Math.floor((b-a)/86400000); }
+function dayNum(){ var n=daysSince(LAUNCH)+1; return n<1?1:n; }
+function todaySet(){
+  var per=3, start=((dayNum()-1)*per)%BANK.length, out=[];
+  for(var i=0;i<per;i++){ out.push(BANK[(start+i)%BANK.length]); }
+  return out;
+}
+function pad(n){ return (n<10?"0":"")+n; }
+function clock(ms){ if(ms<0)ms=0; var s=Math.floor(ms/1000);
+  return pad(Math.floor(s/3600))+":"+pad(Math.floor(s/60)%60)+":"+pad(s%60); }
+function rnd(a,b){ return a+Math.random()*(b-a); }
+function show(id){ var all=document.querySelectorAll(".screen"); for(var i=0;i<all.length;i++) all[i].classList.remove("on"); $(id).classList.add("on"); }
+
+/* ---------- sound (tiny, no files) ---------- */
+function audio(){ if(ac) return ac; try{ ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ac=null; } return ac; }
+function blip(freq,dur,type,vol){
+  var a=audio(); if(!a) return;
+  try{
+    var o=a.createOscillator(), g=a.createGain();
+    o.type=type||"sine"; o.frequency.value=freq;
+    g.gain.value=vol||0.06;
+    o.connect(g); g.connect(a.destination);
+    var t=a.currentTime; o.start(t);
+    g.gain.setValueAtTime(g.gain.value,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.stop(t+dur+0.02);
+  }catch(e){}
+}
+function sndOk(){ blip(880,0.10,"triangle",0.07); setTimeout(function(){blip(1320,0.16,"triangle",0.05);},90); }
+function sndNo(){ blip(150,0.24,"sawtooth",0.05); }
+function sndTap(){ blip(520,0.05,"square",0.03); }
+function buzz(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+/* ---------- boot ---------- */
+$("streakTop").textContent="STREAK "+best;
+
+function buildAreas(){
+  var g=$("areaGrid"); g.innerHTML="";
+  AREAS.forEach(function(n){
+    var b=document.createElement("button"); b.className="area"; b.textContent=n;
+    b.addEventListener("click",function(){ try{localStorage.setItem("wb_area",n);}catch(e){} area=n; startRound(); });
+    g.appendChild(b);
+  });
+}
+
+/* ---------- lock screen ---------- */
+function nextOpen(now){
+  var d=new Date(now); d.setSeconds(0,0);
+  if(d.getHours()<7){ d.setHours(7,0,0,0); }
+  else { d.setDate(d.getDate()+1); d.setHours(7,0,0,0); }
+  return d.getTime();
+}
+function lockTick(){
+  if(!$("s-lock").classList.contains("on")) return;
+  $("lockCd").textContent=clock(nextOpen(Date.now())-Date.now());
+}
+setInterval(lockTick,1000);
+
+/* ---------- round ---------- */
+function startRound(){
+  day=dayNum(); set=todaySet(); qi=0; correct=0; marks=[]; tStart=Date.now();
+  show("s-play"); nextQ();
+}
+function nextQ(){
+  $("factBox").classList.remove("on"); $("qNext").style.display="none";
+  if(qi>=set.length){ finish(); return; }
+  var item=set[qi];
+  $("qNum").textContent="QUESTION "+(qi+1)+" OF "+set.length;
+  $("qText").textContent=item.q;
+  $("qFill").style.width="100%";
+  var box=$("opts"); box.innerHTML="";
+  item.o.forEach(function(txt,i){
+    var b=document.createElement("button"); b.className="opt";
+    b.innerHTML='<span class="k">'+String.fromCharCode(65+i)+'</span><span>'+txt+'</span>';
+    b.addEventListener("click",function(){ answer(i,b); });
+    box.appendChild(b);
+  });
+  qStart=Date.now();
+  if(timer) clearInterval(timer);
+  timer=setInterval(function(){
+    var left=SECS-(Date.now()-qStart)/1000;
+    if(left<0) left=0;
+    $("qFill").style.width=(left/SECS*100)+"%";
+    $("qTime").textContent=Math.max(0,Math.ceil(left))+"s";
+    if(left<=0){ answer(-1,null); }
+  },100);
+}
+function answer(idx,btn){
+  if(timer) clearInterval(timer);
+  var item=set[qi], right=(idx===item.a), timedOut=(idx===-1);
+  var secs=Math.min(SECS,(Date.now()-qStart)/1000);
+  marks.push(right?1:0);
+  if(right){ correct++; }
+
+  var opts=$("opts").children;
+  for(var i=0;i<opts.length;i++){
+    if(i===item.a) opts[i].classList.add("right");
+    else if(i===idx) opts[i].classList.add("wrong");
+    opts[i].setAttribute("disabled","disabled");
+  }
+  $("qTime").textContent=timedOut?"TIME":secs.toFixed(1)+"s";
+  if(right){ sndOk(); buzz(10); } else { sndNo(); buzz([8,50,8]); }
+  $("factTxt").textContent=(right?"":"No be so. ")+item.f;
+  $("factBox").classList.add("on");
+  $("qNext").style.display="block";
+  $("qNext").textContent=(qi===set.length-1)?"SEE MY RESULT →":"NEXT →";
+}
+$("qNext").addEventListener("click",function(){ sndTap(); qi++; nextQ(); });
+
+/* ---------- finish ---------- */
+function finish(){
+  var total=Math.round((Date.now()-tStart)/1000);
+  var sim=Math.floor(rnd(2400,3600));
+  var rank=1+Math.floor(Math.pow(Math.random(),1.7)*(correct/3)*sim*0.16);
+  if(correct===3 && rank>40) rank=1+Math.floor(Math.random()*40);
+  var newStreak=correct>0?best+1:0;
+  try{ localStorage.setItem("wb_streak",String(newStreak)); }catch(e){}
+  best=newStreak; $("streakTop").textContent="STREAK "+best;
+
+  $("dKicker").textContent="DAY "+day+" · TODAY'S RESULT";
+  $("dScore").textContent=correct+"/3";
+  $("dTime").textContent=total+"s";
+  $("dArea").textContent=area||"—";
+  $("dRank").textContent="#"+rank.toLocaleString("en-US")+" of "+sim.toLocaleString("en-US");
+  var g=$("dGrid"); g.innerHTML="";
+  marks.forEach(function(m){ var d=document.createElement("div"); d.className="sq "+(m?"ok":"no"); g.appendChild(d); });
+
+  buildBoard(area);
+  drawCard(correct,total,rank,sim);
+  show("s-done"); sndOk();
+}
+
+var areaPos=0;
+function buildBoard(myArea){
+  var el=$("board"); el.innerHTML="";
+  var rows=AREAS.map(function(n){ return {n:n,c:Math.floor(rnd(120,900))}; })
+    .sort(function(a,b){ return b.c-a.c; });
+  areaPos=0;
+  rows.forEach(function(r,i){
+    var mine=(r.n===myArea);
+    if(mine) areaPos=i+1;
+    var d=document.createElement("div"); d.className="row"+(mine?" me":"");
+    d.innerHTML="<span>"+(i+1)+" &nbsp;"+r.n+(mine?" (you)":"")+"</span><span><b>"+r.c.toLocaleString("en-US")+"</b></span>";
+    el.appendChild(d);
+  });
+}
+
+/* ---------- share card ---------- */
+var cardBlob=null;
+function fit(x,txt,maxW,start,family){
+  var s=start; x.font="800 "+s+"px "+family;
+  while(x.measureText(txt).width>maxW && s>16){ s-=2; x.font="800 "+s+"px "+family; }
+}
+function drawCard(score,total,rank,sim){
+  var c=$("cardPrev"), x=c.getContext("2d"), W=1080, H=1350;
+  var MONO="ui-monospace,Menlo,monospace", SANS="-apple-system,Segoe UI,Inter,Arial";
+  x.fillStyle="#0B0B0C"; x.fillRect(0,0,W,H);
+  x.fillStyle="rgba(217,183,120,.07)"; x.beginPath(); x.arc(W/2,-120,660,0,Math.PI*2); x.fill();
+  x.fillStyle="#D9B778"; x.font="800 26px "+MONO;
+  x.fillText("WARRI BRAIN",72,130);
+  x.fillStyle="rgba(239,234,224,.45)"; x.font="700 22px "+MONO;
+  fit(x,"DAY "+day+" · "+String(area||"WARRI").toUpperCase(),W-144,22,MONO);
+  x.fillText("DAY "+day+" · "+String(area||"WARRI").toUpperCase(),72,176);
+  x.fillStyle="#EFEAE0"; x.font="800 200px "+SANS;
+  x.fillText(score+"/3",64,400);
+  var bx=72, by=470, s=86, gap=18;
+  marks.forEach(function(m,i){
+    x.fillStyle=m?"#D9B778":"rgba(232,93,58,.75)";
+    x.fillRect(bx+i*(s+gap),by,s,s);
+  });
+  x.fillStyle="rgba(239,234,224,.85)"; x.font="700 34px "+MONO;
+  x.fillText(total+" SECONDS",72,640);
+  x.fillStyle="#EFEAE0"; x.font="800 92px "+SANS;
+  x.fillText("#"+rank.toLocaleString("en-US"),64,780);
+  x.fillStyle="rgba(239,234,224,.45)"; x.font="700 26px "+MONO;
+  fit(x,"OF "+sim.toLocaleString("en-US")+" IN WARRI TODAY",W-144,26,MONO);
+  x.fillText("OF "+sim.toLocaleString("en-US")+" IN WARRI TODAY",72,824);
+  x.strokeStyle="rgba(239,234,224,.16)"; x.beginPath(); x.moveTo(72,900); x.lineTo(W-72,900); x.stroke();
+  x.fillStyle="rgba(239,234,224,.55)"; x.font="600 27px "+SANS;
+  x.fillText("Only people from this city get these ones right.",72,960);
+  x.fillStyle="#D9B778"; x.font="800 30px "+MONO;
+  x.fillText("WARRI NO DEY CARRY LAST",72,1030);
+  var arealine=(area||"WARRI").toUpperCase()+(areaPos?" — "+areaPos+"TH LOUDEST TODAY":" — LOUDEST TODAY");
+  x.fillStyle="rgba(239,234,224,.80)";
+  fit(x,arealine,W-144,38,SANS);
+  x.fillText(arealine,72,1110);
+  x.fillStyle="rgba(239,234,224,.40)"; x.font="700 24px "+MONO;
+  x.fillText("Play tomorrow, 7:00am",72,1272);
+  x.fillStyle="#EFEAE0"; x.font="800 26px "+MONO;
+  fit(x,URL_SHORT,W-144,26,MONO);
+  x.fillText(URL_SHORT,72,1312);
+  try{ c.toBlob(function(b){ cardBlob=b; },"image/png"); }catch(e){}
+}
+function shareText(score,total,rank){
+  var g=marks.map(function(m){ return m?"🟨":"🟥"; }).join("");
+  return "Warri Brain · Day "+day+"\n"+g+" "+score+"/3 · "+total+"s · #"+rank.toLocaleString("en-US")+" in Warri\n"+URL_SHORT;
+}
+$("shareBtn").addEventListener("click",function(){
+  var score=correct, total=Math.round((Date.now()-tStart)/1000);
+  var txt=shareText(score,total,parseInt(($("dRank").textContent.match(/#([\d,]+)/)||[0,"0"])[1].replace(/,/g,""),10)||0);
+  var done=false;
+  if(navigator.canShare && cardBlob){
+    try{
+      var f=new File([cardBlob],"warri-brain-day"+day+".png",{type:"image/png"});
+      if(navigator.canShare({files:[f]})){
+        navigator.share({files:[f],text:txt,title:"Warri Brain"}).then(function(){done=true;},function(){});
+      }
+    }catch(e){}
+  }
+  if(!done && navigator.share){ navigator.share({text:txt,title:"Warri Brain"}).catch(function(){}); return; }
+  if(!done && cardBlob){ var u=URL.createObjectURL(cardBlob); window.open(u,"_blank"); }
+});
+$("dlBtn").addEventListener("click",function(){
+  if(!cardBlob) return;
+  var a=document.createElement("a"); a.href=URL.createObjectURL(cardBlob);
+  a.download="warri-brain-day"+day+".png"; document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* ---------- entry ---------- */
+buildAreas();
+$("lockPlay").addEventListener("click",function(){ audio(); if(area) startRound(); else show("s-area"); });
+if(area) $("areaGrid").querySelectorAll(".area"); 
+show(area?"s-lock":"s-lock");
+lockTick();
+window.__wb={bank:BANK.length,day:dayNum(),set:function(){return todaySet().map(function(q){return q.q;});},state:function(){return (document.querySelector(".screen.on")||{}).id;},area:function(){return area;},marks:function(){return marks.slice();}};
+})();
+</script>
+</body>
+</html>

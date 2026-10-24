@@ -44,6 +44,13 @@
   .spacer{flex:1 1 auto;min-height:12px;}
   .trio b i{font-style:normal;}
 
+  /* ---------- skyline ---------- */
+  .sky{margin:0 -20px 18px;width:calc(100% + 40px);flex:none;}
+  .sky svg{display:block;width:100%;height:auto;}
+  @keyframes fl{0%,100%{opacity:1}50%{opacity:.5}}
+  .sky .flame{animation:fl 1.7s ease-in-out infinite;}
+  @media(prefers-reduced-motion:reduce){.sky .flame{animation:none}}
+
   /* ---------- how it works ---------- */
   .trio{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--ink);border-right:0;margin-top:18px;}
   .trio>div{padding:12px 10px;border-right:2px solid var(--ink);}
@@ -77,9 +84,12 @@
 
   /* ---------- areas ---------- */
   .agrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px;}
-  .area{border:2px solid var(--ink);background:var(--paper);padding:16px 12px;text-align:left;cursor:pointer;
+  .area{border:2px solid var(--ink);background:var(--paper);padding:13px 12px 11px;text-align:left;cursor:pointer;
     font:900 13px/1.15 var(--disp);text-transform:uppercase;letter-spacing:.01em;color:var(--ink);}
+  .area b{display:block;font-weight:900;}
+  .area i{display:block;font:600 9px/1.4 var(--mono);letter-spacing:.14em;color:var(--faint);font-style:normal;margin-top:3px;}
   .area:active{background:var(--accent);}
+  .area:active i{color:rgba(18,16,14,.7);}
 
   /* ---------- quiz ---------- */
   .qhead{display:flex;justify-content:space-between;align-items:baseline;
@@ -154,6 +164,7 @@
 
   <!-- ========== LOCKED / HOOK ========== -->
   <section class="screen on" id="s-lock">
+    <div class="sky" id="sky"></div>
     <h1 class="hero">WAFFI<br>NO DEY<br><em>CARRY LAST</em></h1>
     <p class="lede">Three questions about this city. One drop a day, 7:00am. Only people from here fit answer them.</p>
     <div class="rule"></div>
@@ -279,6 +290,42 @@
   ];
 
   var AREAS=["Okpaka / Wetland","Effurun","Ekpan","Obori / Osubi","Ugborikoko","Ubeji","Agbarho","Warri Central"];
+  var LGA={"Okpaka / Wetland":"Udu","Effurun":"Uvwie","Ekpan":"Uvwie","Obori / Osubi":"Okpe","Ugborikoko":"Uvwie","Ubeji":"Uvwie","Agbarho":"Ughelli North","Warri Central":"Warri South"};
+
+  /* ---- the city: river, bridge, palms, and the flare that never goes off ---- */
+  var INKC="#12100E", ACCC="#FF4A17";
+  var SKY_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 118" width="430" height="118">'
+   +'<path d="M0 78H430" stroke="'+INKC+'" stroke-width="2"/>'
+   +'<g stroke="'+INKC+'" stroke-width="2" opacity=".45" fill="none">'
+   +'<path d="M14 90h58M92 90h40M150 90h34"/><path d="M4 101h74M96 101h96M250 101h44M310 101h40"/>'
+   +'<path d="M20 111h56M96 111h74M300 111h60"/></g>'
+   +'<path d="M330 91h20M334 102h12" stroke="'+ACCC+'" stroke-width="3" opacity=".85"/>'
+   +'<g fill="'+INKC+'">'
+   +'<rect x="10" y="66" width="204" height="7"/>'
+   +'<rect x="54" y="28" width="7" height="38"/><rect x="160" y="28" width="7" height="38"/>'
+   +'<rect x="246" y="76" width="170" height="4"/><rect x="250" y="64" width="72" height="4"/>'
+   +'<rect x="300" y="70" width="62" height="4"/>'
+   +'<rect x="252" y="44" width="20" height="34"/><rect x="280" y="54" width="15" height="24"/>'
+   +'<rect x="300" y="48" width="17" height="30"/><rect x="336" y="16" width="6" height="62"/>'
+   +'<rect x="256" y="38" width="12" height="6"/><rect x="304" y="42" width="9" height="6"/>'
+   +'<rect x="264" y="30" width="2" height="8"/><rect x="310" y="34" width="2" height="8"/>'
+   +'<path d="M204 78q4-10 12-8 8-4 12 4 6-2 6 4z"/>'
+   +'<path d="M240 100q24 11 48 0 -6 8-24 8-18 0-24-8z"/>'
+   +'<rect x="261" y="87" width="4" height="13"/><circle cx="263" cy="84" r="3.4"/>'
+   +'</g>'
+   +'<g fill="none" stroke="'+INKC+'" stroke-width="2.4">'
+   +'<path d="M14 63h196" stroke-width="5" stroke-dasharray="2 12"/>'
+   +'<path d="M57 28Q108 52 163 28" stroke-width="3"/>'
+   +'<path d="M57 28 12 66M163 28 212 66"/>'
+   +'<path d="M72 35v31M84 40v26M96 45v21M108 48v18M120 45v21M132 40v26M144 35v31"/>'
+   +'<path d="M222 78C220 60 224 44 228 32M238 78C236 62 240 48 244 36" stroke-width="3"/>'
+   +'<path d="M228 32C222 26 216 24 210 26M228 32C226 23 227 17 231 13M228 32C235 26 241 25 247 27M228 32C230 24 236 21 241 22M228 32C224 29 219 30 215 35"/>'
+   +'<path d="M244 36C239 32 235 31 231 33M244 36C243 29 245 25 249 22M244 36C250 32 254 32 258 35M244 36C245 30 249 28 253 29"/>'
+   +'<path d="M270 91 284 103"/>'
+   +'</g>'
+   +'<path class="flame" fill="'+ACCC+'" d="M339 16C331 10 333 3 339 0 345 3 347 10 339 16Z"/>'
+   +'</svg>';
+
   var URL_SHORT="nexa-tech-layers.github.io/warri-brain";
   var BRAND="SPONSOR SLOT — OPEN";
   var SECS=8, LAUNCH=new Date(2026,9,25);
@@ -360,7 +407,8 @@
     var g=$("areaGrid"); g.innerHTML="";
     AREAS.forEach(function(n){
       var b=document.createElement("button");
-      b.className="area"; b.type="button"; b.textContent=n;
+      b.className="area"; b.type="button";
+      b.innerHTML="<b>"+n+"</b><i>"+(LGA[n]||"")+" LGA</i>";
       b.onclick=function(){
         area=n; try{ localStorage.setItem("wb_area",n); }catch(e){}
         tone(700,.08,"square",.05);
@@ -489,47 +537,57 @@
     var s=start; x.font="900 "+s+"px "+family;
     while(x.measureText(txt).width>maxW && s>16){ s-=2; x.font="900 "+s+"px "+family; }
   }
+  var skyImg=null, lastCard=null;
   function drawCard(score,secs,rank,field){
+    lastCard=[score,secs,rank,field];
     var PAPER="#F1EBDF", INK="#12100E", ACC="#FF4A17";
     var MONO="ui-monospace,Menlo,monospace", DISP="'Archivo Black',Impact,'Arial Black',sans-serif";
     var c=$("cardPrev"), x=c.getContext("2d"), W=1080, H=1350;
     x.clearRect(0,0,W,H);
     x.fillStyle=PAPER; x.fillRect(0,0,W,H);
-    x.fillStyle=ACC; x.fillRect(0,0,W,26); x.fillRect(0,H-26,W,26);
-    x.fillStyle=INK; x.fillRect(64,110,372,62);
+    x.fillStyle=ACC; x.fillRect(0,0,W,26);
+    x.fillStyle=INK; x.fillRect(64,95,372,62);
     x.fillStyle=PAPER; x.font="900 30px "+DISP;
-    x.fillText("WARRI BRAIN",80,153);
+    x.fillText("WARRI BRAIN",80,138);
     x.fillStyle="rgba(18,16,14,.55)"; x.font="700 24px "+MONO;
     var dayline="DAY "+day+" · "+String(area||"WARRI").toUpperCase();
     fit(x,dayline,W-128,24,MONO);
-    x.fillText(dayline,64,232);
-    x.fillStyle=INK; x.font="900 250px "+DISP;
-    x.fillText(score+"/3",54,470);
+    x.fillText(dayline,64,205);
+    x.fillStyle="rgba(18,16,14,.42)"; x.font="700 20px "+MONO;
+    fit(x,"QUESTIONS FROM "+BRAND,W-128,20,MONO);
+    x.fillText("QUESTIONS FROM "+BRAND,64,245);
+    x.fillStyle=INK; x.font="900 230px "+DISP;
+    x.fillText(score+"/3",52,430);
     x.fillStyle="rgba(18,16,14,.62)"; x.font="700 34px "+MONO;
-    x.fillText(secs+" SECONDS",64,540);
-    x.fillStyle=INK; x.fillRect(64,600,90,90);
-    x.fillRect(172,600,90,90); x.fillRect(280,600,90,90);
+    x.fillText(secs+" SECONDS",64,497);
+    x.fillStyle=INK; x.fillRect(64,545,90,90);
+    x.fillRect(172,545,90,90); x.fillRect(280,545,90,90);
     x.fillStyle=ACC;
-    for(var i=0;i<score;i++) x.fillRect(64+i*108,600,90,90);
-    x.fillStyle=INK; x.font="900 130px "+DISP;
-    x.fillText("#"+rank.toLocaleString("en-US"),54,840);
+    for(var i=0;i<score;i++) x.fillRect(64+i*108,545,90,90);
+    x.fillStyle=INK; x.font="900 120px "+DISP;
+    x.fillText("#"+rank.toLocaleString("en-US"),52,775);
     x.fillStyle="rgba(18,16,14,.55)"; x.font="700 26px "+MONO;
     var fl="OF "+field.toLocaleString("en-US")+" IN WARRI TODAY";
     fit(x,fl,W-128,26,MONO);
-    x.fillText(fl,64,884);
-    x.fillStyle=INK; x.fillRect(64,940,W-128,5);
+    x.fillText(fl,64,818);
+    x.fillStyle=INK; x.fillRect(64,858,W-128,5);
     x.fillStyle="rgba(18,16,14,.70)"; x.font="600 30px Archivo,sans-serif";
-    x.fillText("Only people from this city get these ones right.",64,1000);
+    x.fillText("Only people from this city get these ones right.",64,912);
     var al=(area||"WARRI").toUpperCase()+(areaPos?" — "+areaPos+"TH LOUDEST TODAY":" — LOUDEST TODAY");
     x.fillStyle=INK; fit(x,al,W-128,42,DISP);
-    x.fillText(al,64,1070);
-    x.fillStyle="rgba(18,16,14,.45)"; x.font="700 24px "+MONO;
-    x.fillText("Play tomorrow, 7:00am",64,1210);
-    x.fillStyle=INK; x.font="900 27px "+MONO;
-    fit(x,URL_SHORT,W-128,27,MONO);
-    x.fillText(URL_SHORT,64,1256);
-    x.fillStyle="rgba(18,16,14,.45)"; x.font="700 20px "+MONO;
-    x.fillText("QUESTIONS FROM "+BRAND,64,1300);
+    x.fillText(al,64,972);
+    x.fillStyle="rgba(18,16,14,.5)"; x.font="700 24px "+MONO;
+    var pre="Play tomorrow, 7:00am — ";
+    x.fillText(pre,64,1030);
+    var pw=x.measureText(pre).width;
+    x.fillStyle=INK; x.font="900 24px "+MONO;
+    x.fillText(URL_SHORT,64+pw,1030);
+    if(skyImg&&skyImg.complete&&skyImg.naturalWidth) x.drawImage(skyImg,0,1054,W,296);
+  }
+  function loadSky(){
+    skyImg=new Image();
+    skyImg.onload=function(){ if(lastCard) drawCard(lastCard[0],lastCard[1],lastCard[2],lastCard[3]); };
+    skyImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(SKY_SVG);
   }
 
   /* ---- share ---- */
@@ -565,6 +623,8 @@
   $("dlBtn").onclick=download;
 
   /* ---- boot ---- */
+  $("sky").innerHTML=SKY_SVG;
+  loadSky();
   buildAreas();
   todaysSet();
   lockTeaser();
